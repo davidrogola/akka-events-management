@@ -29,6 +29,15 @@
         </configuration>
       </plugin>
       <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.4.1</version>
+        <configuration>
+          <rules>
+            <dependencyConvergence />
+          </rules>
+        </configuration>
+      </plugin>
+      <plugin>
         <artifactId>maven-shade-plugin</artifactId>
         <version>3.2.1</version>
         <executions>
@@ -38,7 +47,12 @@
             </goals>
             <configuration>
               <transformers>
-                <transformer />
+                <transformer>
+                  <resource>reference.conf</resource>
+                </transformer>
+                <transformer>
+                  <mainClass>StartUp</mainClass>
+                </transformer>
               </transformers>
             </configuration>
           </execution>
