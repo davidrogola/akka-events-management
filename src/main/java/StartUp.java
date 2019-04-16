@@ -24,11 +24,13 @@ public class StartUp {
 
 
     public static void main(String[] args) {
+        Config configBase = ConfigFactory.load();
 
         String actorSystemName = "EventsManagementService";
         if(args.length == 0)
         {
-           initializeCluster(new String[]{"2551", "8080", "2552", "8081"},actorSystemName);
+            //initializeCluster(new String[]{"2551", "8080", "2552", "8081"},actorSystemName);
+            initializeActorSystem(actorSystemName,configBase);
             return;
         }
 
