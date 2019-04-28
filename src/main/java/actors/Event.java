@@ -9,9 +9,10 @@ import messages.BookingResult;
 import messages.commands.EventAddedResponse;
 import messages.query.GetEvent;
 import org.javatuples.Pair;
+import scala.concurrent.duration.Duration;
 
 import java.io.Serializable;
-import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 public class Event extends AbstractActor {
 
@@ -136,7 +137,7 @@ public class Event extends AbstractActor {
     @Override
     public  void preStart() throws Exception{
         super.preStart();
-        getContext().setReceiveTimeout(Duration.ofSeconds(120));
+        getContext().setReceiveTimeout(Duration.apply(2, TimeUnit.DAYS));
     }
 
     @Override

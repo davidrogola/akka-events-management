@@ -10,4 +10,5 @@ actors/Event$BookEvent.class
 messages/EventMessageExtrator.class
 messages/commands/EventAddedResponse.class
 routes/EventRouter.class
+LocalClusterStartUp.class
 StartUp.class

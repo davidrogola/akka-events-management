@@ -72,7 +72,7 @@
           </execution>
         </executions>
         <configuration>
-          <repository>${project.artifactId}</repository>
+          <repository>davidrogola/events-management</repository>
           <tag>${project.version}</tag>
           <buildArgs>
             <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
@@ -81,6 +81,12 @@
       </plugin>
     </plugins>
   </build>
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

@@ -7,6 +7,13 @@
   <version>1.0-SNAPSHOT</version>
   <name>akka-events-booking-java</name>
   <url>http://maven.apache.org</url>
+ <repositories>
+   <repository>
+     <id>jitpack.io</id>
+     <url>https://jitpack.io</url>
+   </repository>
+ </repositories>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -24,7 +31,6 @@
       <artifactId>akka-cluster-metrics_2.12</artifactId>
       <version>2.5.22</version>
     </dependency>
-
     <dependency>
       <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-http_2.12</artifactId>
@@ -66,14 +72,27 @@
       <artifactId>activation</artifactId>
       <version>1.1</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/de.heikoseeberger/constructr-akka -->
     <dependency>
-      <groupId>de.heikoseeberger</groupId>
-      <artifactId>constructr-akka_2.11</artifactId>
-      <version>0.13.2</version>
+      <groupId>com.lightbend.akka.management</groupId>
+      <artifactId>akka-management_2.12</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.lightbend.akka.management</groupId>
+      <artifactId>akka-management-cluster-http_2.12</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.lightbend.akka.management</groupId>
+      <artifactId>akka-management-cluster-bootstrap_2.12</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.lightbend.akka.discovery</groupId>
+      <artifactId>akka-discovery-aws-api_2.12</artifactId>
+      <version>1.0.0</version>
     </dependency>
   </dependencies>
-
 
   <build>
       <plugins>
@@ -135,7 +154,7 @@
           <artifactId>dockerfile-maven-plugin</artifactId>
           <version>1.4.10</version>
           <configuration>
-            <repository>${project.artifactId}</repository>
+            <repository>davidrogola/events-management</repository>
             <tag>${project.version}</tag>
             <buildArgs>
               <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
@@ -154,4 +173,5 @@
         </plugin>
     </plugins>
   </build>
+
 </project>
