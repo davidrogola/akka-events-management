@@ -7,6 +7,13 @@
   <version>1.0-SNAPSHOT</version>
   <name>akka-events-booking-java</name>
   <url>http://maven.apache.org</url>
+ <repositories>
+   <repository>
+     <id>jitpack.io</id>
+     <url>https://jitpack.io</url>
+   </repository>
+ </repositories>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -24,7 +31,6 @@
       <artifactId>akka-cluster-metrics_2.12</artifactId>
       <version>2.5.22</version>
     </dependency>
-
     <dependency>
       <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-http_2.12</artifactId>
@@ -61,10 +67,35 @@
       <artifactId>javatuples</artifactId>
       <version>1.2</version>
     </dependency>
+    <dependency>
+      <groupId>javax.activation</groupId>
+      <artifactId>activation</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.lightbend.akka.management</groupId>
+      <artifactId>akka-management_2.12</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.lightbend.akka.management</groupId>
+      <artifactId>akka-management-cluster-http_2.12</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.lightbend.akka.management</groupId>
+      <artifactId>akka-management-cluster-bootstrap_2.12</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.lightbend.akka.discovery</groupId>
+      <artifactId>akka-discovery-aws-api_2.12</artifactId>
+      <version>1.0.0</version>
+    </dependency>
   </dependencies>
 
   <build>
-    <plugins>
+      <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -86,23 +117,61 @@
           <mainClass>StartUp</mainClass>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>com.spotify</groupId>
-        <artifactId>dockerfile-maven-plugin</artifactId>
-        <version>1.4.3</version>
-        <executions>
-          <execution>
-            <id>default</id>
-            <goals>
-              <goal>build</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <repository>davidrogola/events-management</repository>
-          <tag>${project.version}</tag>
-        </configuration>
-      </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>1.4.1</version>
+          <configuration>
+            <rules><dependencyConvergence/></rules>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>3.2.1</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>shade</goal>
+              </goals>
+              <configuration>
+                <transformers>
+                  <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                    <resource>reference.conf</resource>
+                  </transformer>
+                  <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                    <mainClass>
+                      StartUp
+                    </mainClass>
+                  </transformer>
+                </transformers>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>com.spotify</groupId>
+          <artifactId>dockerfile-maven-plugin</artifactId>
+          <version>1.4.10</version>
+          <configuration>
+            <repository>davidrogola/events-management</repository>
+            <tag>${project.version}</tag>
+            <buildArgs>
+              <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+            </buildArgs>
+          </configuration>
+          <executions>
+            <execution>
+              <id>default</id>
+              <phase>install</phase>
+              <goals>
+                <goal>build</goal>
+                <goal>push</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
     </plugins>
   </build>
+
 </project>
