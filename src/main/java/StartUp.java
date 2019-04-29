@@ -70,13 +70,19 @@ public class StartUp {
     public static void initializeClusterSharding(ActorSystem actorSystem, Config config)
     {
         ClusterShardingSettings settings = ClusterShardingSettings.create(actorSystem);
+
         ActorRef eventsRegion = ClusterSharding.get(actorSystem).start("Events",Event.props(),
                 settings, EventMessageExtrator.eventMessageExtractor);
 
+        initializeHttpServer(actorSystem,eventsRegion,config);
+
+    }
+
+    private static  void initializeHttpServer(ActorSystem actorSystem, ActorRef shardRegion,Config config){
         Http http = Http.get(actorSystem);
         ActorMaterializer materializer = ActorMaterializer.create(actorSystem);
 
-        final LoggingAdapter log = Logging.getLogger(actorSystem,eventsRegion);
+        final LoggingAdapter log = Logging.getLogger(actorSystem,shardRegion);
 
         EventRouter routes = new EventRouter(log);
 
