@@ -2,6 +2,7 @@ messages/EventMessageExtrator$1.class
 actors/Booking.class
 messages/BookingResult.class
 messages/query/GetEvent.class
+helpers/AwsConfigHelper.class
 messages/query/GetAllEvents.class
 actors/Event$AddNewEventCommand.class
 actors/Event$EventInfo.class

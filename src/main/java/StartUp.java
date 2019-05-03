@@ -5,7 +5,7 @@ import akka.actor.ActorSystem;
 import akka.cluster.Cluster;
 import akka.cluster.sharding.ClusterSharding;
 import akka.cluster.sharding.ClusterShardingSettings;
-import akka.discovery.awsapi.ecs.EcsServiceDiscovery;
+import akka.discovery.awsapi.ecs.AsyncEcsServiceDiscovery;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import akka.http.javadsl.Http;
@@ -18,16 +18,10 @@ import akka.http.javadsl.model.*;
 import akka.stream.ActorMaterializer;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import helpers.AwsConfigHelper;
 import messages.EventMessageExtrator;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import routes.EventRouter;
 import scala.util.Either;
-
-import java.io.IOException;
 import java.net.InetAddress;
 
 public class StartUp {
@@ -37,15 +31,21 @@ public class StartUp {
         try {
             Config configBase = ConfigFactory.load("application.conf");
             String actorSystemName = configBase.getString("app.cluster.name");
-            String environment = configBase.getString("app.envType");
+            String environment = configBase.getString("app.aws.envType");
+            
+            System.out.println("Updated Image found");
+            AwsConfigHelper awsConfig = new AwsConfigHelper(configBase);
 
             if(isAWS(environment)) {
                 InetAddress privateAddress = getContainerAddress();
                 String dockerAddress = privateAddress.getHostAddress();
-
                 System.out.println("dockerAddress: " + dockerAddress);
-                String hostAddress = getHostAddress(configBase.getString("app.aws_http_endpoint")) ;
-                configBase = setUpAkkaManagementConfig(hostAddress,dockerAddress);
+
+                String hostAddress = awsConfig.getHostAddress() ;
+                System.out.println("IPV4_Address: " + hostAddress);
+
+              //  System.out.println("NetworkInterfaceIPv4Address: "+awsConfig.getNetworkInterfaceIPv4Address());
+               // configBase = setUpAkkaManagementConfig(dockerAddress,dockerAddress);
             }
 
             ActorSystem actorSystem = ActorSystem.create(actorSystemName,configBase);
@@ -66,7 +66,6 @@ public class StartUp {
     }
 
 
-
     public static void initializeClusterSharding(ActorSystem actorSystem, Config config)
     {
         ClusterShardingSettings settings = ClusterShardingSettings.create(actorSystem);
@@ -85,8 +84,9 @@ public class StartUp {
         final LoggingAdapter log = Logging.getLogger(actorSystem,shardRegion);
 
         EventRouter routes = new EventRouter(log);
+        AwsConfigHelper awsConfig = new AwsConfigHelper(config);
 
-        String hostName = config.getString("akka.remote.netty.tcp.bind-hostname");
+        String hostName = awsConfig.getHostAddress(); // config.getString("akka.remote.netty.tcp.bind-hostname");
         int port = config.getInt("app.webapi.http.port");
         Flow<HttpRequest, HttpResponse, NotUsed> routeFlow = routes.createRoutes(actorSystem)
                 .flow(actorSystem,materializer);
@@ -106,7 +106,7 @@ public class StartUp {
     }
 
     private static InetAddress getContainerAddress(){
-        final Either<String,InetAddress> address =  EcsServiceDiscovery.getContainerAddress();
+        final Either<String,InetAddress> address =  AsyncEcsServiceDiscovery.getContainerAddress();
         if(address.isLeft())
         {
             System.err.println("Unable to get container address, so exiting -"+ address.left().get());
@@ -115,24 +115,6 @@ public class StartUp {
         return  address.right().get();
     }
 
-    private static  String getHostAddress(String awsEndpoint){
-        try {
-            CloseableHttpClient httpClient = HttpClients.createDefault();
-            HttpGet httpGet = new HttpGet(awsEndpoint);
-
-            CloseableHttpResponse response = httpClient.execute(httpGet);
-            org.apache.http.HttpEntity httpEntity = response.getEntity();
-
-            String responseString = EntityUtils.toString(httpEntity, "UTF-8");
-            httpClient.close();
-            System.out.println(responseString + " EC2 IP Address");
-            return responseString;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return  null;
-        }
-    }
 
     private  static  boolean isAWS(String environment){
         return "AWS".equals(environment);

@@ -89,8 +89,13 @@
     </dependency>
     <dependency>
       <groupId>com.lightbend.akka.discovery</groupId>
-      <artifactId>akka-discovery-aws-api_2.12</artifactId>
+      <artifactId>akka-discovery-aws-api-async_2.12</artifactId>
       <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.6</version>
     </dependency>
   </dependencies>
 
