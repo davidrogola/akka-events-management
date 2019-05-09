@@ -11,6 +11,7 @@ import akka.http.javadsl.server.PathMatchers;
 import akka.http.javadsl.server.Route;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
+import helpers.AkkaClusterManagement;
 import messages.BookingResult;
 import messages.commands.EventAddedResponse;
 import messages.query.GetEvent;
@@ -24,9 +25,11 @@ import java.util.concurrent.TimeUnit;
 public class EventRouter extends AllDirectives {
 
     final private LoggingAdapter log;
+    final  private AkkaClusterManagement clusterManagement;
 
-    public EventRouter(LoggingAdapter log) {
+    public EventRouter(LoggingAdapter log,AkkaClusterManagement _clusterManagement) {
        this.log = log;
+       this.clusterManagement = _clusterManagement;
     }
 
     Timeout timeout = new Timeout(Duration.create(5,TimeUnit.SECONDS)); // required for the actorRef.ask method
@@ -39,13 +42,20 @@ public class EventRouter extends AllDirectives {
         return route(pathPrefix("events", () ->
                  route(path(PathMatchers.segment("add"),()-> route(addNewEvent(shardRegion))),
                  path(PathMatchers.segment("get").slash(PathMatchers.integerSegment()), eventId->route(getEvent(shardRegion,eventId))),
-                 path(PathMatchers.segment("book"),()->route(bookTicket(shardRegion))))));
+                 path(PathMatchers.segment("book"),()->route(bookTicket(shardRegion))),
+                 path(PathMatchers.segment("health"),()->route(getHealthStatus()))
+              )),
+                pathPrefix("cluster",()->
+                        route(path(PathMatchers.segment("members"),()->route(getClusterMembers(clusterManagement)))
+                        )));
     }
 
+    private  Route getHealthStatus(){
+        return  get(()-> complete(StatusCodes.OK,"Server Online"));
+    }
 
     private Route addNewEvent(ActorRef shardRegion) {
-        return post(() -> {
-            return entity(
+        return post(() -> entity(
                     Jackson.unmarshaller(Event.AddNewEventCommand.class), event -> {
 
                         try {
@@ -60,8 +70,7 @@ public class EventRouter extends AllDirectives {
                             return complete(StatusCodes.INTERNAL_SERVER_ERROR);
                         }
                     }
-            );
-        });
+            ));
     }
 
     private Route getEvent(ActorRef shardRegion, int event){
@@ -101,6 +110,10 @@ public class EventRouter extends AllDirectives {
 
                 }
         ));
+    }
+
+    private  Route getClusterMembers(AkkaClusterManagement clusterManagement){
+        return get(()-> complete(StatusCodes.OK,clusterManagement.getClusterMembers()));
     }
 
 

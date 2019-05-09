@@ -7,5 +7,6 @@
 /Users/davidogola/Documents/CodeBase/akka-events-booking-java/src/main/java/messages/commands/EventAddedResponse.java
 /Users/davidogola/Documents/CodeBase/akka-events-booking-java/src/main/java/messages/query/GetEvent.java
 /Users/davidogola/Documents/CodeBase/akka-events-booking-java/src/main/java/LocalClusterStartUp.java
+/Users/davidogola/Documents/CodeBase/akka-events-booking-java/src/main/java/helpers/AkkaClusterManagement.java
 /Users/davidogola/Documents/CodeBase/akka-events-booking-java/src/main/java/messages/BookingResult.java
 /Users/davidogola/Documents/CodeBase/akka-events-booking-java/src/main/java/StartUp.java

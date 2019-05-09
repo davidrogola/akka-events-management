@@ -1,6 +1,7 @@
 messages/EventMessageExtrator$1.class
 actors/Booking.class
 messages/BookingResult.class
+helpers/AkkaClusterManagement.class
 messages/query/GetEvent.class
 helpers/AwsConfigHelper.class
 messages/query/GetAllEvents.class
