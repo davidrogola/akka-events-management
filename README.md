@@ -3,22 +3,20 @@
   discovery method AWS API-ECS discovery.
   
   Cluster sharding is useful when you need to distribute actors across several nodes in the cluster and want to be able 
-  to interact with them using their logical identifier, but without having to care about their physical location in the cluster, 
-  which might also change over time. Refer to this for more details [Cluster Sharding](https://doc.akka.io/docs/akka/current/cluster-sharding.html)
+  to interact with them using their logical identifier, but without having to care about their physical location in the  cluster, which might also change over time. Refer to [Cluster Sharding](https://doc.akka.io/docs/akka/current/cluster-sharding.html) for more details.
   
-  For the sample project its an event booking project with events represented as akka actors. 
-  The event actor receives listens to three message types: AddEventCommnad, GetEvent, BookEvent. When a message is sent to an Event actor
-  the ShardCoordinator ensures that the message is routed to the correct actor within the cluster.
+  For the sample project, it is an event booking project, with an event being represented as an akka actor within the system. 
+  The event actor listens to three message types: AddEventCommnad, GetEvent, BookEvent. When a message is sent to an Event       actor the ShardCoordinator ensures that the message is routed to the correct event within the cluster.
   
   The AWS ECS discovery method is the bootstrapping method used to form the cluster on ECS. Refer to the application.conf file for 
   the configuration details. You are required to specify the aws cluster name that your application is running on and the service name for
-  which the task instances are running on. This is to ensure that the akka cluster is formed successfully when the running task instances are discovered.
+  which your task instances are running on ECS. This is to ensure that the akka cluster is formed successfully when the running task instances are discovered by the ClusterBootsrapper.
   Please refer to this [AWS Discovery API](https://developer.lightbend.com/docs/akka-management/current/discovery/aws.html) for more details.
   
   ## Running the project locally
    Change the main class configuration in the *pom.xml* file from *StartUp* to point the *LocalClusterStartUp* class for running the cluster locally.
-   This example uses 2 loopback addressess localy to test the cluster formation a single machine. Refer here [Loopback Address](https://www.techopedia.com/definition/2440/loopback-address)
-   To enable loopback address on Mac run the following command on the terminal before starting the running the project:
+   This example uses 2 loopback addressess localy to test the cluster formation on a single machine. Refer here [Loopback Address](https://www.techopedia.com/definition/2440/loopback-address)
+   To enable loopback address on Mac run the following command on the terminal before the running the project:
    
       sudo ifconfig lo0 alias 127.0.0.2 up
       sudo ifconfig lo0 alias 127.0.0.3 up
@@ -115,7 +113,7 @@
         "unreachable": []
       }
      
- The result should show all the member nodes present in the local cluster with the UP status meaning all nodes in the cluster are reachable.
+ The result should show all the member nodes present in the local cluster with the *UP* status meaning all nodes in the cluster are reachable.
  
  ## Running the project on AWS ECS
  
@@ -192,8 +190,8 @@
           }
       
   The cluster discovery method being used is *aws-api-ecs-async* provided by akka management. The bootstrap method will automatically 
-  discover the running instances in the same aws cluster specfied above and initiate the process of akka cluster formation.
-  For this bootstrapping method to work with AWS ECS with EC2 launch type the following configurations should be done:
+  discover the running container instances in the same aws cluster specfied above and initiate the process of akka cluster formation.
+  For this bootstrapping method to work on AWS ECS with EC2 launch type the following configurations should be done:
        
        - The following IAM roles should be assigned to the Task Execution role associated with the AWS task defination:
        
