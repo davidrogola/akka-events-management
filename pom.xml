@@ -124,7 +124,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.5.0</version>
         <configuration>
-          <mainClass>local.LocalClusterStartUp</mainClass>
+          <mainClass>StartUp</mainClass>
         </configuration>
       </plugin>
         <plugin>

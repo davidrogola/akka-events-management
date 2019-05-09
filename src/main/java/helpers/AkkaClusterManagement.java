@@ -19,10 +19,9 @@ public class AkkaClusterManagement {
 
     public  String getClusterMembers(){
 
-        String managementEndpoint = buildAkkaManagementEndpoint();
-        String getClusterMembersUrl = managementEndpoint.concat("/cluster/members");
+        StringBuilder managementEndpoint = new StringBuilder(buildAkkaManagementEndpoint());
+        String getClusterMembersUrl = managementEndpoint.append("/cluster/members").toString();
         return awsConfigHelper.sendGetRequest(getClusterMembersUrl);
     }
-
 
 }

@@ -24,12 +24,6 @@ public  class  AwsConfigHelper
         return sendGetRequest(configuration.getString("app.aws.ipv4"));
      }
 
-     public String getNetworkInterfaceIPv4Address(){
-         String mac = getNetworkInterfaceMac();
-         String endpoint = String.format(configuration.getString("app.aws.network_interface_ipv4"),mac);
-         return sendGetRequest(endpoint);
-     }
-
      public InetAddress getContainerAddress(){
          final Either<String,InetAddress> address =  AsyncEcsServiceDiscovery.getContainerAddress();
          if(address.isLeft())
@@ -44,9 +38,6 @@ public  class  AwsConfigHelper
          return  configuration.getString("akka.management.http.port");
      }
 
-     private String getNetworkInterfaceMac(){
-         return sendGetRequest(configuration.getString("app.aws.network_interface_mac"));
-     }
 
 
      public   String sendGetRequest(String endpoint){
@@ -65,12 +56,4 @@ public  class  AwsConfigHelper
          }
      }
 
-     public  String getStringResponse(HttpEntity httpEntity){
-         try {
-             return  EntityUtils.toString(httpEntity, "UTF-8");
-         } catch (IOException e) {
-             e.printStackTrace();
-             return  null;
-         }
-     }
  }
