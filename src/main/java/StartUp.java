@@ -18,11 +18,11 @@ import akka.http.javadsl.model.*;
 import akka.stream.ActorMaterializer;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import helpers.AkkaClusterHelper;
 import helpers.AkkaClusterManagement;
 import helpers.AwsConfigHelper;
 import messages.EventMessageExtrator;
 import routes.EventRouter;
-import scala.util.Either;
 import java.net.InetAddress;
 
 public class StartUp {
@@ -35,7 +35,7 @@ public class StartUp {
             String environment = configBase.getString("app.aws.envType");
             AwsConfigHelper awsConfig = new AwsConfigHelper(configBase);
 
-            if(isAWS(environment)) {
+            if(AkkaClusterHelper.isAWS(environment)) {
                 InetAddress privateAddress =awsConfig.getContainerAddress();
                 String dockerAddress = privateAddress.getHostAddress();
                 System.out.println("dockerAddress: " + dockerAddress);
@@ -47,7 +47,7 @@ public class StartUp {
             ClusterBootstrap.get(actorSystem).start();
 
             final Config finalConfigBase = configBase;
-            Runnable runnable = ()-> initializeClusterSharding(actorSystem, finalConfigBase);
+            Runnable runnable = ()->AkkaClusterHelper.initializeClusterSharding(actorSystem, finalConfigBase);
             Cluster.get(actorSystem).registerOnMemberUp(runnable);
 
             System.out.println("Cluster Bootstrap Started successfully");
@@ -58,44 +58,6 @@ public class StartUp {
         }
     }
 
-
-    public static void initializeClusterSharding(ActorSystem actorSystem, Config config)
-    {
-        ClusterShardingSettings settings = ClusterShardingSettings.create(actorSystem);
-
-        ActorRef eventsRegion = ClusterSharding.get(actorSystem).start("Events",Event.props(),
-                settings, EventMessageExtrator.eventMessageExtractor);
-
-        initializeHttpServer(actorSystem,eventsRegion,config);
-
-    }
-
-    private static  void initializeHttpServer(ActorSystem actorSystem, ActorRef shardRegion,Config config){
-        Http http = Http.get(actorSystem);
-        ActorMaterializer materializer = ActorMaterializer.create(actorSystem);
-
-        final LoggingAdapter log = Logging.getLogger(actorSystem,shardRegion);
-        AwsConfigHelper awsConfigHelper = new AwsConfigHelper(config);
-
-        String hostName = isAWS(config.getString("app.aws.envType")) ?
-                                 awsConfigHelper.getContainerAddress().getHostAddress():
-                                 config.getString("akka.management.http.hostname");
-
-        int port = config.getInt("app.webapi.http.port");
-        EventRouter routes = new EventRouter(log,new AkkaClusterManagement(awsConfigHelper,hostName));
-
-        Flow<HttpRequest, HttpResponse, NotUsed> routeFlow = routes.createRoutes(actorSystem)
-                .flow(actorSystem,materializer);
-
-        http.bindAndHandle(routeFlow, ConnectHttp.toHost(hostName,port),materializer);
-        log.info("Server online at http://{}:{}/", hostName, port);
-    }
-
-
-
-    private  static  boolean isAWS(String environment){
-        return "AWS".equals(environment);
-    }
 
 
 }

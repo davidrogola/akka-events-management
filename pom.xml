@@ -97,6 +97,11 @@
       <artifactId>httpclient</artifactId>
       <version>4.5.6</version>
     </dependency>
+    <dependency>
+      <groupId>com.ajjpj.simple-akka-downing</groupId>
+      <artifactId>simple-akka-downing_2.11</artifactId>
+      <version>0.9.1</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -119,7 +124,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.5.0</version>
         <configuration>
-          <mainClass>StartUp</mainClass>
+          <mainClass>local.LocalClusterStartUp</mainClass>
         </configuration>
       </plugin>
         <plugin>
