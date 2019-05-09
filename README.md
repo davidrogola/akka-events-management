@@ -207,4 +207,16 @@
         
    Please refer to [AWS Task Networking](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-networking.html) and [Task Roles](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html) for more details.
    On succesful set up you should be able to see the cluster forming and view the cluster members using the endpoint *cluster/members*.
+   
+### Split Brain Resolver
+
+When operating an Akka cluster you must consider how to handle network partitions (a.k.a. split brain scenarios) and machine  crashes (including JVM and hardware failures). This is crucial for correct behavior if you use Cluster Singleton or Cluster   Sharding, especially together with Akka Persistence.Refer to [this](https://developer.lightbend.com/docs/akka-commercial-addons/current/split-brain-resolver.html) for details.
+  
+The Akka cluster has a failure detector that will notice network partitions and machine crashes (but it cannot distinguish     the two). It uses periodic heartbeat messages to check if other nodes are available and healthy. These observations by the     failure detector are referred to as a node being unreachable and it may become reachable again if the failure detector         observes that it can communicate with it again.
+  
+If the unreachable nodes are not downed at all they will still be part of the cluster membership. Meaning that Cluster Singleton and Cluster Sharding will not failover to another node. While there are unreachable nodes new nodes that are joining the cluster will not be promoted to full worthy members (with status Up). Similarly, leaving members will not be removed until all unreachable nodes have been resolved. In other words, keeping unreachable members for an unbounded time is undesirable.
+  
+The strategy to use for resolving split brain scenarios depends on the nature of your cluster and the use case involved. I settled on the static-quorum stratergy because of the fixed number of nodes running in the cluster and we know the required minimum number of nodes required to declare the cluster as fully operational. 
+
+The open source cluster auto-downing provider used here is [anohaase simple-akka-downing](https://github.com/arnohaase/simple-akka-downing) that provides three major strategies to use depending on your cluster structure.
   
